@@ -1,0 +1,6 @@
+title Supprimer les autorisations effectuées
+
+Serveur backend->Serveur stockage:getIdToDelete()
+Serveur backend<--Serveur stockage:listId
+Serveur backend->Contrat Intelligent:deleteAuthorization(listId)
+Serveur backend<--Contrat Intelligent:détailTransaction

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Page de l'auditeur</title>
+</head>
+<body>
+    <h1>Auditeur</h1>
+    <p>Ici l'auditeur peut voir toutes les autorisations sur un moment précis. (Il faut ajouter l'heure pour que la date soit prise en compte.)</p>
+    <h2>Rechercher par date</h2>
+    <div id="display" style="background-color: red;"></div>
+    <h3>Autorisation par date (100 par 100)</h3>
+    <form>
+        <p id="maxPage">Max page : </p>
+        <label for="page">Page : </label><input type="number" id="page" placeholder="Numéro de la page" min="0" />
+        <input type="datetime-local" id="dateFind" name="dateFind" />
+        <input type="submit" id="btnFind" value="Rechercher" />
+    </form><br /><br />
+    <div id="div" style="overflow:hidden; overflow-y:auto; max-height: 300px;"></div>
+    <h3>Informations sur les données demandées</h3>
+    <label for="dateStart">Date de début</label>
+    <input type="date" id="dateStart" class="dateSearch" />
+    <label for="dateEnd">Date de fin</label>
+    <input type="date" id="dateEnd" class="dateSearch" />
+    <button id="dateSearch">Rechercher</button><br /><br />
+    <div style="overflow:hidden; overflow-y:auto; max-height: 500px;">
+        <table>
+            <thead>
+                <tr>
+                    <td>Date</td>
+                    <td>Heure</td>
+                    <td>Id commande</td>
+                    <td>Id livreur</td>
+                </tr>
+            </thead>
+            <tbody id="table"></tbody>
+        </table>
+    </div><br />
+    <button><a href="/logout">Déconnexion</a></button>
+    <button><a href="/">Retour</a></button>
+    <script>
+        const page = document.getElementById('page');
+        const dateFind = document.getElementById('dateFind');
+        const dateStart = document.getElementById('dateStart');
+        const dateEnd = document.getElementById('dateEnd');
+        const dateSearch = document.getElementById('dateSearch');
+        const div = document.getElementById('div');
+        const table = document.getElementById('table');
+        const display = document.getElementById("display");
+        dateStart.valueAsDate = new Date();
+        dateEnd.valueAsDate = new Date();
+        dateEnd.min = dateStart.valueAsDate.toLocaleDateString('en-CA');
+        dateStart.max = dateEnd.valueAsDate.toLocaleDateString('en-CA');
+        dateFind.max = new Date();
+
+        const searchByDate = _=> {
+            table.innerHTML = '';
+            display.textContent = "";
+            if (dateStart.valueAsDate != null && dateEnd.valueAsDate != null) {
+                fetch('api/auth/getLogByDate', {
+                    method: 'POST',
+                    body: JSON.stringify({ dateStart: dateStart.valueAsDate.setHours(0, 0, 0, 0), dateEnd: dateEnd.valueAsDate.setHours(0, 0, 0, 0) }),
+                    headers: { 'Content-Type': 'application/json' }
+
+                }).then(async res => {
+                    const data = await res.json();
+                    if (res.status == 400) {
+                        display.textContent = data.message;
+
+                    } else {
+                        Object.entries(data.data).forEach(entry => {
+                            entry[1].forEach((item, i) => {
+                                const tr = document.createElement("tr");
+                                const tdDate = document.createElement("td");
+                                const tdIdOrder = document.createElement("td");
+                                const tdIdDeliverer = document.createElement("td");
+                                const tdHour = document.createElement("td");
+                                tdDate.textContent = new Date(item.date).toLocaleDateString();
+                                tdHour.textContent = new Date(item.date).toLocaleTimeString();
+                                tdIdOrder.textContent = item.idOrder.toString();
+                                tdIdDeliverer.textContent = item.idDeliverer.toString();
+                                if (item.error) {
+                                    tr.style = "color: red;";
+                                }
+                                tr.appendChild(tdDate);
+                                tr.appendChild(tdHour);
+                                tr.appendChild(tdIdOrder);
+                                tr.appendChild(tdIdDeliverer);
+                                table.appendChild(tr);
+                            });
+                        });
+                    }
+                });
+
+            } else {
+                display.textContent = "Les dates de début et de fin ne peuvent pas être nulles !";
+            }
+        };
+
+        btnFind.addEventListener('click',  e => {
+            e.preventDefault();
+            div.innerHTML = "";
+            display.textContent = "";
+            const nbPage = page.valueAsNumber;
+            if (nbPage != NaN && nbPage != 0 && nbPage >= page.min && nbPage <= page.max) {
+                fetch('api/auth/getAuthorizationAudit', {
+                    method: 'POST',
+                    body: JSON.stringify({ page: nbPage, timestamp: dateFind.valueAsDate!=null?dateFind.valueAsDate.getTime():null }),
+                    headers: { 'Content-Type': 'application/json' }
+
+                }).then(async res => {
+                    const data = await res.json();
+                    if (res.status == 200) {
+                        data.list.forEach((item, i) => {
+                            div.innerHTML += `
+                            <li>
+                            ID commande : ${parseInt(item[0].hex)}
+                            &emsp;&emsp;ID livreur : ${parseInt(item[1].hex)}
+                            &emsp;&emsp;Date limite : ${item[2].hex=="0x00"?"0":new Date(parseInt(item[2].hex) * 1000).toLocaleDateString()}
+                            </li>`;
+                        });
+                    } else {
+                        display.textContent = data.messsage;
+                    }
+                });
+
+            } else if (page.max == 0) {
+                display.textContent = "Il n'y a pas d'autorisation à cette date sur le contrat intelligent";
+
+            } else {
+                display.textContent = "La page doit être un chiffre plus grand que 0 et plus petit ou égal à " + page.max;
+            }
+        });
+
+        dateSearch.addEventListener('click', searchByDate);
+
+        const getMaxPage = async _=> {
+            display.textContent = "";
+            btnFind.disabled = true;
+            await fetch('api/auth/getCountAuthorization', {
+                method: 'POST',
+                body: JSON.stringify({ timestamp: dateFind.valueAsDate!=null?dateFind.valueAsDate.getTime():null }),
+                headers: { 'Content-Type': 'application/json' }
+
+            }).then(async res => {
+                const data = await res.json();
+                if (res.status == 200) {
+                    if (data.size.hex == "0x00") {
+                        page.max = 0;
+
+                    } else {
+                        page.max = Math.ceil(parseInt(data.size.hex) / 100);
+                    }
+
+                } else {
+                    display.textContent = data.message;
+                }
+            });
+            btnFind.disabled = false;
+        };
+
+        document.querySelectorAll(".dateSearch").forEach(item => {
+            item.addEventListener('change', _=> {
+                dateEnd.min = dateStart.valueAsDate.toLocaleDateString('en-CA');
+                dateStart.max = dateEnd.valueAsDate.toLocaleDateString('en-CA');
+            });
+        });
+
+        dateFind.addEventListener('change', async _=> {
+            await getMaxPage();
+            maxPage.textContent = "Max page : " + page.max;
+        });
+
+        window.onload = async _=> {
+            await getMaxPage();
+            maxPage.textContent = "Max page : " + page.max;
+            searchByDate();
+        };
+    </script>
+</body>
+</html>

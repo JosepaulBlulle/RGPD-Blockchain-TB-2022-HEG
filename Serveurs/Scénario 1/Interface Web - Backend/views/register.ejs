@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Page d'enregistrement</title>
+</head>
+<body>
+    <h1>Création d'un compte</h1>
+    <form>
+        <div id="display"></div><br />
+        <label for="username">Pseudonyme</label><br /><input type="text" id="username" required /><br />
+        <label for="email">Email</label><br /><input type="email" id="email" required /><br />
+        <label for="password">Mot de passe</label><br /><input type="password" id="password" required /><br /><br />
+        <input type="checkbox" id="acceptChk" required /><label for="acceptChk">Accepter la charte d'utilisation des données personnelles qui est ... </label><br /><br />
+        <a>Consentir pour l'envoi...</a><br />
+        <input type="checkbox" id="emailChk" /><label for="emailChk">...de newsletters.</label><br />
+        <input type="checkbox" id="usernameChk" disabled /><label for="usernameChk">...personnalisées avec le pseudonyme.</label><br />
+        <input type="checkbox" id="genderChk" disabled /><label for="genderChk">...personnalisées avec le genre.</label><br />
+        <input type="radio" name="genderRdo" id="hommeRdo" value="H" disabled /><label for="hommeRdo">Homme</label>
+        <input type="radio" name="genderRdo" id="femmeRdo" value="F" disabled /><label for="femmeRdo">Femme</label><br /><br />
+        <input type="submit" value="S'enregistrer" /><br /><br />
+    </form>
+    <a href="/login">Déjà enregistré ? Se loguer</a>
+    <script type="text/javascript">
+        const form = document.querySelector('form');
+        const username = document.getElementById('username');
+        const password = document.getElementById('password');
+        const email = document.getElementById('email');
+        const display = document.getElementById('display');
+        const radioH = document.getElementById('hommeRdo');
+        const radioF = document.getElementById('femmeRdo');
+        const checkEmail = document.getElementById('emailChk');
+        const checkGender = document.getElementById('genderChk');
+        const checkUsername = document.getElementById('usernameChk');
+
+        checkGender.addEventListener('change', _=> {
+            radioF.required = checkGender.checked;
+            radioH.required = checkGender.checked;
+            radioF.disabled = !checkGender.checked;
+            radioH.disabled = !checkGender.checked;
+
+            if (!checkGender.checked) {
+                radioF.checked = false;
+                radioH.checked = false;
+            }
+        });
+
+        checkEmail.addEventListener('change', _=> {
+            checkGender.disabled = !checkEmail.checked;
+            checkUsername.disabled = !checkEmail.checked;
+
+            if (!checkEmail.checked) {
+                checkGender.checked = false;
+                checkUsername.checked = false;
+                radioF.checked = false;
+                radioH.checked = false;
+                radioF.disabled = true;
+                radioH.disabled = true;
+            }
+        });
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            display.style = "background-color: orange;";
+            display.textContent = 'Chargement...';
+            try {
+                fetch('/api/auth/register', {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        username: username.value,
+                        password: password.value,
+                        email: email.value,
+                        gender: (checkGender.checked?document.querySelector('input[name="genderRdo"]:checked').value:null),
+                        emailConsent: checkEmail.checked,
+                        usernameConsent: checkUsername.checked,
+                        genderConsent: checkGender.checked,
+                        timestamp: 0
+                    }),
+                    headers: { 'Content-Type': 'application/json' }
+
+                }).then(async res => {
+                    const data = await res.json();
+                    if (res.status == 200) {
+                        location.assign('/' + data.role);
+
+                    } else {
+                        display.style = "background-color: red;";
+                        display.textContent = `${data.message}. ${data.error ? data.error : ''}`;
+                    }
+                });
+
+            } catch (err) {
+                display.textContent = `${err.message}. ${err.error ? err.error : ''}`;
+            }
+        });
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+title Supprimer un compte
+
+Client->Interface web:supprimerCompte
+Interface web->Serveur backend:deleteConsent()
+Serveur backend->Contrat intelligent:deleteConsent(id)
+Serveur backend<--Contrat intelligent:détailTransaction
+Serveur backend->Serveur stockage:deleteData(id)
+Serveur backend<--Serveur stockage:confirmationErreur
+Serveur backend->Serveur backend:deleteData(id)
+Interface web<--Serveur backend:confirmationErreur
+Client<--Interface web:confirmationErreur

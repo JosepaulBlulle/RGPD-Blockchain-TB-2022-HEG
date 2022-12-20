@@ -1,0 +1,8 @@
+title Voir les autorisations
+
+Audit->Interface web:Voir les autorisations d'une commande
+Interface web->Serveur backend:(idOrder, timestamp)
+Serveur backend->Contrat intelligent:getAuthorization(idOrder, timestamp)
+Serveur backend<--Contrat intelligent:détailTransaction
+Interface web<--Serveur backend:donnéesErreur
+Audit<--Interface web:donnéesErreur

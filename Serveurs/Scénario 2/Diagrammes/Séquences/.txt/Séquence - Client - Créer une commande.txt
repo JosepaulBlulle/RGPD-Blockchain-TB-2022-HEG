@@ -1,0 +1,10 @@
+title Créer une commande
+
+Client->Interface web:Créer une commande
+Interface web->Serveur backend:Transmettre la requête
+Serveur backend->Serveur stockage:post(idOrder, idDeliverer, idClient, timestamp)
+Serveur backend<--Serveur stockage:détailStatut
+Serveur backend->Contrat intelligent:addAuthorization(idOrder, idDeliverer, timestamp)
+Serveur backend<--Contrat intelligent:détailTransaction
+Interface web<--Serveur backend:confirmationErreur
+Client<--Interface web:confirmationErreur

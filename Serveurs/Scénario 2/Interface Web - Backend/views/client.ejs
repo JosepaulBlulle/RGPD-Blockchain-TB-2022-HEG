@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Page du client</title>
+</head>
+<body>
+    <h1>Client</h1>
+    <div id="display" style="background-color: red;"></div><br />
+    <button><a href="/logout">Déconnexion</a></button><br /><br />
+    <label for="maxDate">Date limite (pour des tests) </label><input id="maxDate" type="date" />
+    <button id="newOrder">Nouvelle commande</button>
+    <h2>Commandes en cours</h2>
+    <li id="listOrderInProgress"></li>
+    <h2>Commandes livrées</h2>
+    <li id="listOrderDelivered"></li>
+    <h2>Commandes non livrées et dépassées</h2>
+    <li id="listOrderFailed"></li>
+    <script>
+        const newOrder = document.getElementById('newOrder');
+        const listOrderInProgress = document.getElementById('listOrderInProgress');
+        const listOrderDelivered = document.getElementById('listOrderDelivered');
+        const listOrderFailed = document.getElementById('listOrderFailed');
+        const display = document.getElementById('display');
+        const maxDate = document.getElementById('maxDate');
+
+        maxDate.valueAsDate = new Date();
+
+        const loadOrder = _=> {
+            try {
+                listOrderInProgress.textContent = "";
+                listOrderDelivered.textContent = "";
+                listOrderFailed.textContent = "";
+                fetch('/api/auth/order/client', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+
+                }).then(async res => {
+                    const data = await res.json();
+                    if (res.status === 400 || res.status === 401) {
+                        display.textContent = `${data.message}. ${data.error ? data.error : ''}`;
+
+                    } else {
+                        var ul;
+                        data.forEach(item => {
+                            ul = document.createElement("ul");
+                            ul.innerHTML = `ID Commande : ${item.id} - ID Livreur : ${item.idDeliverer} - Date limite : ${new Date(item.timestamp * 1000).toLocaleDateString("fr-CH", {dateStyle: 'long'})}`;
+
+                            if (item.delivered) {
+                                listOrderDelivered.append(ul);
+
+                            } else if (item.timestamp < Math.floor(Date.now() / 1000)) {
+                                listOrderFailed.append(ul);
+
+                            } else {
+                                listOrderInProgress.append(ul);
+                            }
+                        });
+                    }
+                });
+
+            } catch (err) {
+                display.textContent = `${err.message}. ${err.error ? err.error : ''}`;
+            }
+        };
+
+        window.onload = _=> loadOrder();
+        newOrder.addEventListener('click', _=> {
+            display.style = "background-color: orange;";
+            display.textContent = "Chargement...";
+            if (maxDate.valueAsDate == null) {
+                display.textContent = "La date limite ne doit pas être nulle";
+
+            } else if (confirm(`Créer une nouvelle commande ?`)) {
+                try {
+                    fetch('/api/auth/order/client', {
+                        method: 'POST',
+                        body: JSON.stringify({ timestamp: maxDate.valueAsNumber }),
+                        headers: { 'Content-Type': 'application/json' }
+
+                    }).then(async res => {
+                        if (await res.status === 400 || await res.status === 401) {
+                            const data = await res.json();
+                            display.style = "background-color: red;";
+                            display.textContent = `${data.message}. ${data.error ? data.error : ''}`;
+
+                        } else {
+                            display.style = "background-color: green;";
+                            display.textContent = "Commande créé !";
+                            loadOrder();
+                        }
+                    });
+
+                } catch (err) {
+                    display.textContent = `${err.message}. ${err.error ? err.error : ''}`;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

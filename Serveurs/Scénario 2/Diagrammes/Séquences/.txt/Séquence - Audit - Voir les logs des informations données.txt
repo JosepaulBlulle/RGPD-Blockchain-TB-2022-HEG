@@ -1,0 +1,8 @@
+title Voir les logs des informations données
+
+Audit->Interface web:Voir les logs
+Interface web->Serveur backend:(dateDébut, dateFin)
+Serveur backend->Serveur stockage:get(dateDébut, dateFin)
+Serveur backend<--Serveur stockage:donnéesErreur
+Interface web<--Serveur backend:donnéesErreur
+Audit<--Interface web:donnéesErreur

@@ -1,0 +1,1 @@
+npm i bcrypt cookie-parser ejs ethers express jsonwebtoken mysql2 nodemon

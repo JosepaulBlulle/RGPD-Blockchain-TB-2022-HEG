@@ -1,0 +1,10 @@
+title Modifier le livreur d'une commande
+
+Livreur->Interface web:Modifier le livreur de sa commande
+Interface web->Serveur backend:(idOrder, idDelivererOld)
+Serveur backend->Serveur stockage:put(idOrder, idDelivererOld)
+Serveur backend<--Serveur stockage:confirmationErreur(idDelivererNew)
+Serveur backend->Contrat intelligent:changeDelivererAuthorization(idOrder, idDelivererNew)
+Serveur backend<--Contrat intelligent:détailTransaction
+Interface web<--Serveur backend:confirmationErreur
+Livreur<--Interface web:confirmationErreur

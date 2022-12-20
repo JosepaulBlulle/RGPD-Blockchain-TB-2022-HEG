@@ -1,0 +1,17 @@
+Docker - Page 26
+wsl --shutdown
+wsl --export docker-desktop-data docker-desktop-data.tar
+wsl --unregister docker-desktop-data
+wsl --import docker-desktop-data XXXX docker-desktop-data.tar --version 2
+
+
+Chainlink - Page 26
+docker compose -f "X\docker-compose.yml" create
+
+
+Redis - Page 27
+docker run -d --name redis-stack-server -p 6379:6379 redis/redis-stack-server:latest
+
+
+MySQL - Page 28
+docker create --name mysql -v XXXX:/var/lib/mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=password -e BIND-ADDRESS=127.0.0.1 -d mysql:latest

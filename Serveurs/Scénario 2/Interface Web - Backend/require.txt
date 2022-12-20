@@ -1,0 +1,1 @@
+npm i connect-redis cookie-parser ejs ethers express express-session jsonwebtoken node-fetch@2 nodemon redis

@@ -1,0 +1,8 @@
+title Modifier un consentement
+
+Client->Interface web:modifierConsentements()
+Interface web->Serveur backend:setConsent(email, pseudo, genre, timestamp)
+Serveur backend->Contrat intelligent:setConsent(id, email, pseudo, genre, timestamp)
+Serveur backend<--Contrat intelligent:détailtransaction
+Interface web<--Serveur backend:confirmationErreur
+Client<--Interface web:confirmationErreur

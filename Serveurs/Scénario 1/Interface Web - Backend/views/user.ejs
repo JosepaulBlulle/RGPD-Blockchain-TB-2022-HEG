@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Page du client</title>
+    <script type="text/javascript">
+        const emailChanged = checked => {
+            const timestamp = document.getElementById("emailTimestamp");
+            document.getElementById("usernameRdo0").disabled = !checked;
+            document.getElementById("usernameRdo1").disabled = !checked;
+            document.getElementById("genderRdo0").disabled = !checked;
+            document.getElementById("genderRdo1").disabled = !checked;
+            timestamp.disabled = !checked;
+            document.getElementById("emailTimestampBtn").disabled = !checked;
+
+            if (!checked) {
+                document.getElementById("genderRdo0").checked = !checked;
+                document.getElementById("usernameRdo0").checked = !checked;
+                timestamp.value = "";
+
+            } else {
+                timestamp.min = new Date().toLocaleDateString('en-CA');
+            }
+        };
+
+        window.onload = async _=> {
+            const res = await fetch('/api/auth/getConsent');
+            var consents = await res.json();
+            if (res.status === 200) {
+                const emailTrue = document.getElementById("emailRdo1");
+                const usernameTrue = document.getElementById("usernameRdo1");
+                const genderTrue = document.getElementById("genderRdo1");
+                const emailTimestamp = document.getElementById("emailTimestamp");
+                const emailTimestampBtn = document.getElementById("emailTimestampBtn");
+                const save = document.getElementById("save");
+                const showData = document.getElementById("showData");
+                const display = document.getElementById("display");
+                const deleteAccount = document.getElementById("delete");
+                emailTrue.checked = consents.email;
+                emailChanged(emailTrue.checked);
+                usernameTrue.checked = consents.username;
+                genderTrue.checked = consents.gender;
+                save.disabled = false;
+
+                if (consents.timestamp.hex.toString(16) == "0x00") {
+                    emailTimestamp.value = "";
+
+                } else {
+                    emailTimestamp.valueAsDate = new Date(parseInt(consents.timestamp.hex) * 1000);
+                }
+
+                save.addEventListener('click', _=> {
+                    var timestamp;
+                    display.textContent = '';
+
+                    if (emailTimestamp.value == "" || !emailTrue.checked) {
+                        timestamp = 0;
+
+                    } else {
+                        timestamp = emailTimestamp.valueAsDate.setHours(0, 0, 0, 0);
+                    }
+
+                    if (emailTrue.checked !== consents.email || usernameTrue.checked !== consents.username || genderTrue.checked !== consents.gender || emailTimestamp.valueAsDate != null) {
+                        if (timestamp != 0 && timestamp < Date.now()) {
+                            display.textContent = "Date déjà passée";
+
+                        } else if (confirm(`Voulez-vous enregister ces consentements :
+                                \n Email -> ${emailTrue.checked}
+                                \n Nom d'utilisateur -> ${usernameTrue.checked}
+                                \n Genre -> ${genderTrue.checked}
+                                \n Date limite -> ${timestamp==0?"aucune":new Date(timestamp).toLocaleDateString()}`)) {
+                            save.disabled = true;
+                            display.style = "background-color: orange;";
+                            display.textContent = "Chargement...";
+                            fetch('/api/auth/setConsent', {
+                                method: 'PUT',
+                                body: JSON.stringify({ emailConsent: emailTrue.checked, usernameConsent: usernameTrue.checked, genderConsent: genderTrue.checked, timestamp: timestamp }),
+                                headers: { 'Content-Type': 'application/json' }
+
+                            }).then(async res => {
+                                save.disabled = false;
+                                if (res.status == 200) {
+                                    consents.email = emailTrue.checked;
+                                    consents.username = usernameTrue.checked;
+                                    consents.gender = genderTrue.checked;
+                                    display.style = "background-color: green;";
+                                    display.textContent = "Enregistré !";
+
+                                } else {
+                                    const data = await res.json();
+                                    display.style = "background-color: red;";
+                                    display.textContent = `${data.message}${data.error?", " + data.error:''}`;
+                                }
+                            })
+                        }
+                    }
+                });
+
+                emailTimestampBtn.addEventListener('click', _=> {
+                    emailTimestamp.value = "";
+                });
+
+                deleteAccount.addEventListener('click', _=> {
+                    display.style = "background-color: orange;";
+                    display.textContent = "Chargement...";
+                    fetch('/api/auth/deleteUser', { method: 'DELETE' }).then(res => {
+                        if (res.status === 204) {
+                            location.assign('/logout');
+
+                        } else {
+                            document.body.scrollTop = 0;
+                            document.documentElement.scrollTop = 0;
+                        }
+                    });
+                });
+
+                const showDataFunction = _=> {
+                    fetch('/api/auth/getData').then(async res => {
+                        const data = await res.json();
+                        if (res.status === 200) {
+                            display.textContent = "";
+                            const form = document.getElementById("data");
+                            form.innerHTML += `
+                                <br /><label for="email">Email : </label><input id="email" name="email" value="${data.email}" required /><br />
+                                <label for="username">Nom d'utilisateur : </label><input name="username" value="${data.username}" disabled /><br />
+                                <label for="gender">Genre : </label><select id="gender" name="gender" required>
+                                    <option value="null" ${data.gender==null?'selected="true"':''}></option>
+                                    <option value="H"  ${data.gender=="H"?'selected="true"':''}>Homme</option>
+                                    <option value="F" ${data.gender=="F"?'selected="true"':''}>Femme</option></select><br /><br />
+                                <input type="submit" id="changeData" value="Modifier" />`;
+
+                            showData.removeEventListener('click', showDataFunction);
+                            const email = document.getElementById("email");
+                            const gender = document.getElementById("gender");
+
+                            document.getElementById("changeData").addEventListener('click', e => {
+                                e.preventDefault();
+                                if (email.value !== data.email || gender.value !== data.gender) {
+                                    display.style = "background-color: orange;";
+                                    display.textContent = `Chargement...`;
+                                    fetch('api/auth/changeData', {
+                                        method: 'PUT',
+                                        body: JSON.stringify({ email: email.value, gender: gender.value=="null"?null:gender.value }),
+                                        headers: { 'Content-Type': 'application/json' }
+
+                                    }).then(async res => {
+                                        if (res.status == 200) {
+                                            display.style = "background-color: green;";
+                                            display.textContent = `Modification terminée !`;
+
+                                        } else {
+                                            throw new Error(await res.json());
+                                        }
+
+                                    }).catch(err => {
+                                        display.style = "background-color: red;";
+                                        display.textContent = `${err.message}${err.error?", " + err.error:''}`;
+                                    });
+                                }
+                            });
+
+                        } else {
+                            display.style = "background-color: red;";
+                            display.textContent = `${data.message}${data.error?", " + data.error:''}`;
+                        }
+                    });
+                };
+
+                showData.addEventListener('click', showDataFunction);
+
+            } else {
+                display.style = "background-color: red;";
+                display.textContent = `${consents.message}${consents.error?", " + consents.error:''}`;
+            }
+        };
+    </script>
+</head>
+<body>
+    <h1>Utilisateur</h1>
+    <div id="display"></div>
+    <button id="delete">Supprimer le compte</button>
+    <button id="showData">Montrer les données</button>
+    <form id="data"></form>
+    <h3>Recevoir des newsletters</h3>
+    <input type="radio" name="emailRdo" id="emailRdo1" onchange="emailChanged(true)" /><label for="emailRdo1">Oui</label>
+    <input type="radio" name="emailRdo" id="emailRdo0" checked autocomplete="off" onchange="emailChanged(false)" /><label for="emailRdo0">Non</label><br /><br />
+    <label for="emailTimestamp">Non après le : </label><input type="date" name="emailTimestamp" id="emailTimestamp" />
+    <button id="emailTimestampBtn">Annuler la date</button>
+    <h3>...avec le nom d'utilisateur personalisé</h3>
+    <input type="radio" name="usernameRdo" id="usernameRdo1" /><label for="usernameRdo1">Oui</label>
+    <input type="radio" name="usernameRdo" id="usernameRdo0" checked autocomplete="off" /><label for="usernameRdo0">Non</label><br />
+    <h3>...avec le genre personalisé</h3>
+    <input type="radio" name="genderRdo" id="genderRdo1" /><label for="genderRdo1">Oui</label>
+    <input type="radio" name="genderRdo" id="genderRdo0" checked autocomplete="off" /><label for="genderRdo0">Non</label><br /><br />
+    <button id="logout"><a href="/logout">Déconnexion</a></button>
+    <button id="return"><a href="/">Retour</a></button>
+    <button id="save" disabled>Sauvegarder</button>
+</body>
+</html>

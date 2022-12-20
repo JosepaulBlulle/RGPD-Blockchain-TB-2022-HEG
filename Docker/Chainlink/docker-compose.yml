@@ -1,0 +1,20 @@
+services:
+  pg_chainlink:
+    image: postgres:latest
+    ports:
+      - 5432:5432
+    env_file:
+      - database.env
+    volumes:
+      - XXXX:/var/lib/postgresql/data/
+  chainlink:
+    image: smartcontract/chainlink:1.9.0-root
+    env_file:
+      - .env
+    depends_on:
+      - pg_chainlink
+    ports:
+      - 6688:6688
+    volumes:
+      - XXXX:/chainlink/
+    command: node start --password /chainlink/password.txt --api /chainlink/apicredentials.txt

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Page de l'administrateur</title>
+</head>
+<body>
+    <div id="display"></div>
+    <h1>Utilisateurs</h1>
+    <ul></ul>
+    <h1>Actions</h1>
+    <button id="resetAll">Remettre le scénario à zéro (blockchain, base de données, etc..)</button>
+    <button id="simulateSendEmails">Simulation de l'envoi des newsletters</button>
+    <button><a href="/logout">Déconnexion</a></button>
+    <script type="text/javascript">
+        const ul = document.querySelector("ul");
+        const display = document.getElementById("display");
+        const resetAll = document.getElementById("resetAll");
+        const simulateSendEmails = document.getElementById("simulateSendEmails");
+
+        const getUsers = async _=> {
+            const res = await fetch("/api/auth/getUsers");
+            const data = await res.json();
+
+            data.user.map(mappedUser => {
+                ul.innerHTML += `
+                <li>
+                    <b>Nom d'utilisateur</b> => ${mappedUser.username}<br />
+                    <b>Rôle</b> => ${mappedUser.role}<br />
+                    <b>Id</b> => ${mappedUser.id}<br />
+                </li>`;
+            });
+        };
+        getUsers();
+
+        resetAll.addEventListener('click', async _=> {
+            display.style = "background-color: orange;";
+            display.textContent = "Chargement...";
+
+            const res = await fetch('/api/auth/resetAll', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (res.status === 200) {
+                display.style = "background-color: green;";
+                display.textContent = "Effectué !";
+
+            } else {
+                const data = await res.json();
+                display.style = "background-color: red;";
+                display.textContent = `${data.message}${data.error?", " + data.error:''}`;
+            }
+        });
+
+        simulateSendEmails.addEventListener('click', async _=> {
+            display.style = "background-color: orange;";
+            display.textContent = "Chargement...";
+
+            const res = await fetch('/api/auth/prepareEmails', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (res.status == 200) {
+                display.style = "background-color: green;";
+                display.textContent = "Newsletters envoyées ! - Les données seront affichées sur l'invité de commandes.";
+
+            } else {
+                const data = await res.json();
+                display.style = "background-color: red;";
+                display.textContent = `${data.message}${data.error?", " + data.error:''}`;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,463 @@
+{
+    "CONTRACT_ADDRESS": "X",
+    "OPERATOR_ADDRESS": "Y",
+    "JOB_ID": "Z",
+    "CONTRACT_ABI": [
+    	{
+    		"inputs": [],
+    		"stateMutability": "nonpayable",
+    		"type": "constructor"
+    	},
+    	{
+    		"anonymous": false,
+    		"inputs": [
+    			{
+    				"indexed": true,
+    				"internalType": "bytes32",
+    				"name": "id",
+    				"type": "bytes32"
+    			}
+    		],
+    		"name": "ChainlinkCancelled",
+    		"type": "event"
+    	},
+    	{
+    		"anonymous": false,
+    		"inputs": [
+    			{
+    				"indexed": true,
+    				"internalType": "bytes32",
+    				"name": "id",
+    				"type": "bytes32"
+    			}
+    		],
+    		"name": "ChainlinkFulfilled",
+    		"type": "event"
+    	},
+    	{
+    		"anonymous": false,
+    		"inputs": [
+    			{
+    				"indexed": true,
+    				"internalType": "bytes32",
+    				"name": "id",
+    				"type": "bytes32"
+    			}
+    		],
+    		"name": "ChainlinkRequested",
+    		"type": "event"
+    	},
+    	{
+    		"anonymous": false,
+    		"inputs": [
+    			{
+    				"indexed": false,
+    				"internalType": "bool",
+    				"name": "deleted",
+    				"type": "bool"
+    			}
+    		],
+    		"name": "DeleteConsent",
+    		"type": "event"
+    	},
+    	{
+    		"anonymous": false,
+    		"inputs": [
+    			{
+    				"indexed": true,
+    				"internalType": "address",
+    				"name": "from",
+    				"type": "address"
+    			},
+    			{
+    				"indexed": true,
+    				"internalType": "address",
+    				"name": "to",
+    				"type": "address"
+    			}
+    		],
+    		"name": "OwnershipTransferRequested",
+    		"type": "event"
+    	},
+    	{
+    		"anonymous": false,
+    		"inputs": [
+    			{
+    				"indexed": true,
+    				"internalType": "address",
+    				"name": "from",
+    				"type": "address"
+    			},
+    			{
+    				"indexed": true,
+    				"internalType": "address",
+    				"name": "to",
+    				"type": "address"
+    			}
+    		],
+    		"name": "OwnershipTransferred",
+    		"type": "event"
+    	},
+    	{
+    		"anonymous": false,
+    		"inputs": [
+    			{
+    				"indexed": true,
+    				"internalType": "bytes32",
+    				"name": "requestId",
+    				"type": "bytes32"
+    			},
+    			{
+    				"indexed": false,
+    				"internalType": "string",
+    				"name": "result",
+    				"type": "string"
+    			}
+    		],
+    		"name": "RequestFirstId",
+    		"type": "event"
+    	},
+    	{
+    		"inputs": [],
+    		"name": "acceptOwnership",
+    		"outputs": [],
+    		"stateMutability": "nonpayable",
+    		"type": "function"
+    	},
+    	{
+    		"inputs": [],
+    		"name": "deleteAll",
+    		"outputs": [],
+    		"stateMutability": "nonpayable",
+    		"type": "function"
+    	},
+    	{
+    		"inputs": [
+    			{
+    				"internalType": "uint64[]",
+    				"name": "id",
+    				"type": "uint64[]"
+    			}
+    		],
+    		"name": "deleteConsent",
+    		"outputs": [],
+    		"stateMutability": "nonpayable",
+    		"type": "function"
+    	},
+    	{
+    		"inputs": [
+    			{
+    				"internalType": "uint64",
+    				"name": "id",
+    				"type": "uint64"
+    			}
+    		],
+    		"name": "deleteConsent",
+    		"outputs": [],
+    		"stateMutability": "nonpayable",
+    		"type": "function"
+    	},
+    	{
+    		"inputs": [
+    			{
+    				"internalType": "bytes32",
+    				"name": "_requestId",
+    				"type": "bytes32"
+    			},
+    			{
+    				"internalType": "string",
+    				"name": "result",
+    				"type": "string"
+    			}
+    		],
+    		"name": "fulfill",
+    		"outputs": [],
+    		"stateMutability": "nonpayable",
+    		"type": "function"
+    	},
+    	{
+    		"inputs": [
+    			{
+    				"internalType": "uint64",
+    				"name": "from",
+    				"type": "uint64"
+    			},
+    			{
+    				"internalType": "uint64",
+    				"name": "to",
+    				"type": "uint64"
+    			}
+    		],
+    		"name": "getAllConsent",
+    		"outputs": [
+    			{
+    				"components": [
+    					{
+    						"internalType": "uint64",
+    						"name": "id",
+    						"type": "uint64"
+    					},
+    					{
+    						"internalType": "bool",
+    						"name": "email",
+    						"type": "bool"
+    					},
+    					{
+    						"internalType": "bool",
+    						"name": "username",
+    						"type": "bool"
+    					},
+    					{
+    						"internalType": "bool",
+    						"name": "gender",
+    						"type": "bool"
+    					},
+    					{
+    						"internalType": "uint64",
+    						"name": "timestamp",
+    						"type": "uint64"
+    					}
+    				],
+    				"internalType": "struct ContratScenario1.Consent[]",
+    				"name": "",
+    				"type": "tuple[]"
+    			}
+    		],
+    		"stateMutability": "view",
+    		"type": "function"
+    	},
+    	{
+    		"inputs": [],
+    		"name": "getAllTrueConsent",
+    		"outputs": [
+    			{
+    				"components": [
+    					{
+    						"internalType": "uint64",
+    						"name": "id",
+    						"type": "uint64"
+    					},
+    					{
+    						"internalType": "bool",
+    						"name": "email",
+    						"type": "bool"
+    					},
+    					{
+    						"internalType": "bool",
+    						"name": "username",
+    						"type": "bool"
+    					},
+    					{
+    						"internalType": "bool",
+    						"name": "gender",
+    						"type": "bool"
+    					},
+    					{
+    						"internalType": "uint64",
+    						"name": "timestamp",
+    						"type": "uint64"
+    					}
+    				],
+    				"internalType": "struct ContratScenario1.Consent[]",
+    				"name": "",
+    				"type": "tuple[]"
+    			}
+    		],
+    		"stateMutability": "view",
+    		"type": "function"
+    	},
+    	{
+    		"inputs": [
+    			{
+    				"internalType": "uint64",
+    				"name": "id",
+    				"type": "uint64"
+    			}
+    		],
+    		"name": "getConsent",
+    		"outputs": [
+    			{
+    				"components": [
+    					{
+    						"internalType": "uint64",
+    						"name": "id",
+    						"type": "uint64"
+    					},
+    					{
+    						"internalType": "bool",
+    						"name": "email",
+    						"type": "bool"
+    					},
+    					{
+    						"internalType": "bool",
+    						"name": "username",
+    						"type": "bool"
+    					},
+    					{
+    						"internalType": "bool",
+    						"name": "gender",
+    						"type": "bool"
+    					},
+    					{
+    						"internalType": "uint64",
+    						"name": "timestamp",
+    						"type": "uint64"
+    					}
+    				],
+    				"internalType": "struct ContratScenario1.Consent",
+    				"name": "consent",
+    				"type": "tuple"
+    			}
+    		],
+    		"stateMutability": "view",
+    		"type": "function"
+    	},
+    	{
+    		"inputs": [],
+    		"name": "getFinality",
+    		"outputs": [
+    			{
+    				"internalType": "string",
+    				"name": "",
+    				"type": "string"
+    			}
+    		],
+    		"stateMutability": "pure",
+    		"type": "function"
+    	},
+    	{
+    		"inputs": [],
+    		"name": "getFirstBlockNumber",
+    		"outputs": [
+    			{
+    				"internalType": "uint64",
+    				"name": "",
+    				"type": "uint64"
+    			}
+    		],
+    		"stateMutability": "view",
+    		"type": "function"
+    	},
+    	{
+    		"inputs": [],
+    		"name": "getSize",
+    		"outputs": [
+    			{
+    				"internalType": "uint64",
+    				"name": "",
+    				"type": "uint64"
+    			}
+    		],
+    		"stateMutability": "view",
+    		"type": "function"
+    	},
+    	{
+    		"inputs": [],
+    		"name": "owner",
+    		"outputs": [
+    			{
+    				"internalType": "address",
+    				"name": "",
+    				"type": "address"
+    			}
+    		],
+    		"stateMutability": "view",
+    		"type": "function"
+    	},
+    	{
+    		"inputs": [
+    			{
+    				"internalType": "string",
+    				"name": "url",
+    				"type": "string"
+    			},
+    			{
+    				"internalType": "address",
+    				"name": "_oracle",
+    				"type": "address"
+    			},
+    			{
+    				"internalType": "string",
+    				"name": "_jobId",
+    				"type": "string"
+    			}
+    		],
+    		"name": "sendEmail",
+    		"outputs": [
+    			{
+    				"internalType": "bytes32",
+    				"name": "requestId",
+    				"type": "bytes32"
+    			}
+    		],
+    		"stateMutability": "nonpayable",
+    		"type": "function"
+    	},
+    	{
+    		"inputs": [
+    			{
+    				"internalType": "uint64",
+    				"name": "id",
+    				"type": "uint64"
+    			},
+    			{
+    				"internalType": "bool",
+    				"name": "email",
+    				"type": "bool"
+    			},
+    			{
+    				"internalType": "bool",
+    				"name": "username",
+    				"type": "bool"
+    			},
+    			{
+    				"internalType": "bool",
+    				"name": "gender",
+    				"type": "bool"
+    			},
+    			{
+    				"internalType": "uint64",
+    				"name": "timestamp",
+    				"type": "uint64"
+    			}
+    		],
+    		"name": "setConsent",
+    		"outputs": [],
+    		"stateMutability": "nonpayable",
+    		"type": "function"
+    	},
+    	{
+    		"inputs": [
+    			{
+    				"internalType": "uint64",
+    				"name": "nb",
+    				"type": "uint64"
+    			}
+    		],
+    		"name": "testAddConsent",
+    		"outputs": [],
+    		"stateMutability": "nonpayable",
+    		"type": "function"
+    	},
+    	{
+    		"inputs": [
+    			{
+    				"internalType": "address",
+    				"name": "to",
+    				"type": "address"
+    			}
+    		],
+    		"name": "transferOwnership",
+    		"outputs": [],
+    		"stateMutability": "nonpayable",
+    		"type": "function"
+    	},
+    	{
+    		"inputs": [],
+    		"name": "withdrawLink",
+    		"outputs": [],
+    		"stateMutability": "nonpayable",
+    		"type": "function"
+    	}
+    ]
+}

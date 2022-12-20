@@ -1,0 +1,8 @@
+title Voir les consentements
+
+Audit->Interface web:Voir les consentements d'un client
+Interface web->Serveur backend:(idClient, timestamp)
+Serveur backend->Contrat intelligent:getConsent(idClient, timestamp)
+Serveur backend<--Contrat intelligent:détailTransaction
+Interface web<--Serveur backend:donnéesErreur
+Audit<--Interface web:donnéesErreur

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Page du livreur</title>
+</head>
+<body>
+    <h1>Livreur</h1>
+    <button><a href="/logout">Déconnexion</a></button>
+    <div id="display" style="background-color: red;"></div><br />
+    <h2>Commandes en cours</h2>
+    <li id="listOrderInProgress"></li>
+    <h2>Commandes livrées</h2>
+    <li id="listOrderDelivered"></li>
+    <h2>Commandes non livrées et dépassées</h2>
+    <li id="listOrderFailed"></li>
+    <script>
+        const changeDeliverer = document.getElementById('changeDeliverer');
+        const listOrderInProgress = document.getElementById('listOrderInProgress');
+        const listOrderDelivered = document.getElementById('listOrderDelivered');
+        const listOrderFailed = document.getElementById('listOrderFailed');
+        const display = document.getElementById('display');
+
+        window.onload = _=> {
+            try {
+                fetch('/api/auth/order/deliverer', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+
+                }).then(async res => {
+                    const data = await res.json();
+                    if (res.status === 400 || res.status === 401) {
+                        display.textContent = `${data.message}. ${data.error ? data.error : ''}`;
+
+                    } else {
+                        var ul;
+                        var buttonChangeDeliverer;
+                        var buttonDisplayData;
+                        var buttonDelivered;
+                        data.forEach(item => {
+                            ul = document.createElement("ul");
+                            ul.innerHTML = `Identifiant de la commande : ${item.id}<br />Date de livraison maximum : ${new Date(item.timestamp * 1000).toLocaleDateString("fr-CH", {dateStyle: 'long'})}<br />`;
+
+                            if (item.delivered) {
+                                listOrderDelivered.append(ul);
+
+                            } else {
+                                buttonDisplayData = document.createElement("button");
+                                buttonChangeDeliverer = document.createElement("button");
+                                buttonDelivered = document.createElement("button");
+                                buttonDisplayData.textContent = "Afficher ses informations";
+                                buttonChangeDeliverer.textContent = "Demander un changement";
+                                buttonDelivered.textContent = "Commande effectuée";
+
+                                buttonDisplayData.addEventListener('click', _=> {
+                                    if (confirm(`Afficher les données client pour la commande ${item.id} ?`)) {
+                                        display.style = "background-color: orange;";
+                                        display.textContent = "Chargement...";
+                                        fetch('/api/auth/client/data', {
+                                            method: 'POST',
+                                            body: JSON.stringify({ idOrder: item.id }),
+                                            headers: { 'Content-Type': 'application/json' }
+
+                                        }).then(async res => {
+                                            const data = await res.json();
+                                            if (await res.status === 400 || await res.status === 401) {
+                                                display.style = "background-color: red;";
+                                                display.textContent = `${data.message}. ${data.error ? data.error : ''}`;
+
+                                            } else {
+                                                display.style = "background-color: green;";
+                                                display.textContent = `Adresse: ${data.address}, Ville: ${data.town}, ${data.doorCode?"Porte: " + data.doorCode + ", ":""}Téléphone: ${data.phone}`;
+                                            }
+
+                                        }).catch(err => {
+                                            display.style = "background-color: red;";
+                                            display.textContent = err.message;
+                                        });
+                                    }
+                                });
+
+                                buttonChangeDeliverer.addEventListener('click', e => {
+                                    if (confirm(`Demander un changement de livreur pour la commande ${item.id} ?`)) {
+                                        display.style = "background-color: orange;";
+                                        display.textContent = "Chargement...";
+                                        fetch('/api/auth/order/deliverer', {
+                                            method: 'PUT',
+                                            body: JSON.stringify({ idOrder: item.id }),
+                                            headers: { 'Content-Type': 'application/json' }
+
+                                        }).then(async res => {
+                                            if (await res.status === 400 || await res.status === 401) {
+                                                const data = await res.json();
+                                                display.style = "background-color: red;";
+                                                display.textContent = `${data.message}. ${data.error ? data.error : ''}`;
+
+                                            } else {
+                                                location.assign('/deliverer');
+                                            }
+
+                                        }).catch(err => {
+                                            display.style = "background-color: red;";
+                                            display.textContent = err.message;
+                                        });
+                                    }
+                                });
+
+                                buttonDelivered.addEventListener('click', e => {
+                                    if (confirm(`Confirmer la livraison effectuée de la commande ${item.id} ?`)) {
+                                        display.style = "background-color: orange;";
+                                        display.textContent = "Chargement...";
+                                        fetch('/api/auth/order/delivered', {
+                                            method: 'PUT',
+                                            body: JSON.stringify({ idOrder: item.id }),
+                                            headers: { 'Content-Type': 'application/json' }
+
+                                        }).then(async res => {
+                                            if (await res.status === 400 || await res.status === 401) {
+                                                const data = await res.json();
+                                                display.style = "background-color: red;";
+                                                display.textContent = `${data.message}. ${data.error ? data.error : ''}`;
+
+                                            } else {
+                                                location.assign('/deliverer');
+                                            }
+
+                                        }).catch(err => {
+                                            display.style = "background-color: red;";
+                                            display.textContent = err.message;
+                                        });
+                                    }
+                                });
+                                ul.append(buttonChangeDeliverer);
+                                ul.append(buttonDisplayData);
+                                ul.append(buttonDelivered);
+
+                                if (item.timestamp < Math.floor(Date.now() / 1000)) {
+                                    listOrderFailed.append(ul);
+
+                                } else {
+                                    listOrderInProgress.append(ul);
+                                }
+
+                            }
+                        });
+                    }
+                })
+
+            } catch (err) {
+                display.style = "background-color: red;";
+                display.textContent = `${err.message}. ${err.error ? err.error : ''}`;
+            }
+        };
+    </script>
+</body>
+</html>

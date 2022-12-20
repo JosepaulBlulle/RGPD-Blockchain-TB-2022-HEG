@@ -1,0 +1,6 @@
+title Envoyer les emails
+
+Serveur backend->Contrat intelligent:prepareEmails()
+Contrat intelligent->Serveur stockage:getEmails(id[])
+Serveur backend<--Serveur stockage:emailsConsentis
+Serveur backend->Client:emails

@@ -1,0 +1,11 @@
+title Demander les données d'une commande
+
+Livreur->Interface web:Demander les données d'une commande
+Interface web->Serveur backend:(idOrder, idDeliverer)
+Serveur backend->Contrat intelligent:sendData(...)
+Contrat intelligent->Serveur stockage:post(idOrder, idDeliverer)
+Contrat intelligent<--Serveur stockage:confirmationErreur
+Serveur backend<--Contrat intelligent:confirmationErreur
+Serveur backend<--Serveur stockage:post(donnéesClient)
+Interface web<--Serveur backend:donnéesClient
+Livreur<--Interface web:donnéesClient

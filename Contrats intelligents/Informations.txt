@@ -1,0 +1,2 @@
+Adresse jeton Link sur le testnet Goerli pour le déploiement du contrat d'opérateur - Page 32
+0x326C977E6efc84E512bB9C30f76E30c160eD06FB

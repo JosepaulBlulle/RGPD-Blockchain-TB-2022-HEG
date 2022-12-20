@@ -1,0 +1,10 @@
+title Créer un compte
+
+Client->Interface web:créerCompte
+Interface web->Serveur backend:(email, pseudo, genre, consents)
+Serveur backend->Serveur stockage:post(id, email, pseudo, gender)
+Serveur backend<--Serveur stockage:détailStatut
+Serveur backend->Contrat intelligent:setConsent(id, email, pseudo, genre)
+Serveur backend<--Contrat intelligent:détailTransaction
+Interface web<--Serveur backend:confirmationErreur
+Client<--Interface web:confirmationErreur
